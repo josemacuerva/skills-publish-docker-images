@@ -1,19 +1,38 @@
-name: GitHub Actions Demo
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: [push]
+name: Build & Deploy to Podman (Local Mac)
+
+on:
+  push:
+    branches: [ main ]
+
 jobs:
-  Explore-GitHub-Actions:
+  deploy:
     runs-on: self-hosted
+
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
-      - name: Check out repository code
-        uses: actions/checkout@v6
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show workspace
         run: |
-          ls ${{ github.workspace }}
+          pwd
           ls -lsa
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+
+      - name: Build image with Podman
+        run: |
+          podman build -t demo-podman-app:latest .
+
+      - name: Stop and remove old container (if exists)
+        run: |
+          podman stop demo-podman-app || true
+          podman rm demo-podman-app || true
+
+      - name: Run container
+        run: |
+          podman run -d \
+            --name demo-podman-app \
+            -p 8080:8080 \
+            demo-podman-app:latest
+
+      - name: Show running containers
+        run: podman ps
+``

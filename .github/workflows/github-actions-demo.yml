@@ -35,4 +35,3 @@ jobs:
 
       - name: Show running containers
         run: podman ps
-``

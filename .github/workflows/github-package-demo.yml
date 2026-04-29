@@ -15,34 +15,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Login al GitHub Container Registry
       - name: Login to GHCR
-        run: echo ${{ secrets.GITHUB_TOKEN }} | podman login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | \
+          podman login ghcr.io \
+            -u "${{ github.actor }}" \
+            --password-stdin
 
-      # Build de la imagen
       - name: Build image
         run: |
           podman build \
-            -t ghcr.io/${{ github.repository }}/demo:latest .
+            -t ghcr.io/${{ github.repository }}:demo .
 
-      # Publicación como GitHub Package
       - name: Push image to GHCR
         run: |
-          podman push ghcr.io/${{ github.repository }}/demo:latest
+          podman push ghcr.io/${{ github.repository }}:demo
 
-      # Limpieza del contenedor previo
       - name: Stop old container
         run: |
           podman stop demo || true
           podman rm demo || true
 
-      # Deploy desde el package
       - name: Deploy container
         run: |
           podman run -d \
             --name demo \
             -p 8080:8080 \
-            ghcr.io/${{ github.repository }}/demo:latest
+            ghcr.io/${{ github.repository }}:demo
 
       - name: Verify
         run: podman ps

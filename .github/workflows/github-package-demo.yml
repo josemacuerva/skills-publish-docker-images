@@ -7,6 +7,10 @@ on:
       - .github/workflows/**
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-publish-deploy:
     runs-on: self-hosted
